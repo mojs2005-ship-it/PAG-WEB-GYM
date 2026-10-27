@@ -1,0 +1,58 @@
+name: Production Health Check
+
+# Runs after the CI pipeline finishes on main. Render deploys the commit once
+# the CI checks pass (autoDeployTrigger: checksPass in render.yaml); this
+# workflow then waits until production reports THAT commit on /api/health.
+#
+# Setup: Settings > Secrets and variables > Actions > Variables >
+#        New repository variable  PRODUCTION_URL = https://<your-app>.onrender.com
+# Without the variable the job just prints a notice and succeeds.
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-production:
+    name: Verify production deploy
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    env:
+      PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+      EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Wait for production to run the new commit
+        run: |
+          if [ -z "$PRODUCTION_URL" ]; then
+            echo "::notice::PRODUCTION_URL repository variable is not set - skipping production check."
+            exit 0
+          fi
+
+          url="${PRODUCTION_URL%/}/api/health"
+          echo "Waiting for $url to report commit $EXPECTED_SHA"
+
+          for i in $(seq 1 40); do
+            body=$(curl -s --max-time 20 "$url" || true)
+            echo "[$i/40] $body"
+
+            if echo "$body" | grep -q "\"commit\": *\"$EXPECTED_SHA\""; then
+              echo "Production is running commit $EXPECTED_SHA"
+              exit 0
+            fi
+
+            # Platforms that do not expose the commit: accept a healthy answer.
+            if echo "$body" | grep -q '"commit": *"unknown"' && echo "$body" | grep -q '"status": *"ok"'; then
+              echo "::notice::Production is healthy but does not report its commit."
+              exit 0
+            fi
+
+            sleep 15
+          done
+
+          echo "::error::Production did not report commit $EXPECTED_SHA within 10 minutes."
+          exit 1

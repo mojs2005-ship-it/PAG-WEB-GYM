@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Add Exercise</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="page-header form-hero">
+                <p class="eyebrow">Exercise</p>
+                <h1>Add Exercise</h1>
+                <p class="muted">Add a new exercise to {{ workout_title }}.</p>
+            </div>
+
+            <form class="form-card" action="/sessions/{{ session_id }}/add-exercise" method="POST">
+                {% if error %}
+                    <p class="error-message">{{ error }}</p>
+                {% endif %}
+
+                <label for="exercise_name">Exercise name</label>
+                <input id="exercise_name" type="text" name="exercise_name" placeholder="Enter exercise name" autofocus>
+
+                <button class="button" type="submit">Add Exercise</button>
+            </form>
+
+            <a class="button-secondary" href="/sessions/{{ session_id }}">
+                ← Back to Session
+            </a>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,19 @@
+# Render Blueprint: infrastructure as code for the production service.
+# Create it once from the Render dashboard: New + > Blueprint > pick this repo.
+services:
+  - type: web
+    name: gym-log-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    # Deploy ONLY when the GitHub Actions checks of the commit pass
+    # (unit tests, Selenium, Docker build, security reports).
+    autoDeployTrigger: checksPass
+    healthCheckPath: /api/health
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /app/gym.db

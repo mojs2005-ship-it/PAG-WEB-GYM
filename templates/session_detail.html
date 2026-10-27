@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ workout_title }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    
+    <body>
+        {% set total_sets = namespace(value=0) %}
+        {% for exercise in exercises %}
+            {% set total_sets.value = total_sets.value + exercise.set_count %}
+        {% endfor %}
+
+        <div class="container">
+            <div class="page-header session-hero">
+                <div>
+                    <p class="eyebrow">Workout Session</p>
+                    <h1>{{ workout_title }}</h1>
+                    <p class="muted">
+                        {{ exercises|length }} exercise{% if exercises|length != 1 %}s{% endif %} • {{ total_sets.value }} set{% if total_sets.value != 1 %}s{% endif %} logged
+                    </p>
+                </div>
+
+                <a class="button" href="/sessions/{{ session_id }}/add-exercise">
+                    + Add Exercise
+                </a>
+            </div>
+
+            <div class="helper-card">
+                Click any exercise card to view details, add sets, or manage logged work.
+            </div>
+
+            <h2 class="section-title">Exercises</h2>
+
+            {% if not exercises %}
+                <div class="empty-card">
+                    No exercises yet. Add your first exercise to start building this workout.
+                </div>
+            {% else %}
+                <div class="exercises-list">
+                    {% for exercise in exercises %}
+                        <div class="card set-card session-exercise-card">
+                            <a class="session-link" href="/sessions/{{ session_id }}/exercises/{{ exercise.id }}">
+                                <span class="card-title">{{ exercise.name }}</span>
+                                <p class="card-meta">
+                                    {{ exercise.set_count }} set{% if exercise.set_count != 1 %}s{% endif %} logged
+                                </p>
+                            </a>
+
+                            <div class="card-actions">
+                                <form action="/sessions/{{ session_id }}/exercises/{{ exercise.id }}/delete" method="POST">
+                                    <button class="danger-button" type="submit" onclick="return confirm('Delete this exercise?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <a class="button-secondary" href="/sessions">
+                ← View Sessions
+            </a>
+        </div>
+    </body>
+</html>

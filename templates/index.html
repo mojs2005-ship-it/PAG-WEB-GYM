@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Gym Log Web</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    
+    <body>
+        <div class="container hero-container">
+            <div class="hero-card">
+                <div class="page-header">
+
+                    <h1>Gym Log Web</h1>
+
+                    <p class="muted hero-text">
+                        A simple workout tracker for logging sessions, exercises, and sets.
+                    </p>
+                </div>
+
+                <div class="hero-actions">
+                    <a class="button" href="/sessions">
+                        Open Gym Log
+                    </a>
+                </div>
+
+                <div class="summary-header">
+                    <h2 class="section-title">Workout Summary</h2>
+                    <p class="muted">Your current training log at a glance.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">{{ total_sessions }}</span>
+                        <span class="stat-label">Session{% if total_sessions != 1 %}s{% endif %}</span>
+                        <span class="stat-helper">Workout logs created</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-number">{{ total_exercises }}</span>
+                        <span class="stat-label">Exercise{% if total_exercises != 1 %}s{% endif %}</span>
+                        <span class="stat-helper">Movements tracked</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-number">{{ total_sets }}</span>
+                        <span class="stat-label">Set{% if total_sets != 1 %}s{% endif %} Logged</span>
+                        <span class="stat-helper">Training entries saved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

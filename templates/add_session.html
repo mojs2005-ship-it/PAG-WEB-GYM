@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Add Session</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+        <body>
+            <div class="container">
+                <div class="page-header form-hero">
+                    <p class="eyebrow">New Workout</p>
+                    <h1>Add Workout Session</h1>
+                    <p class="muted">
+                        Create a session for today’s workout, then add exercises and sets from the session page.
+                    </p>
+                </div>
+
+                {% if error %}
+                    <p class="error-message">{{ error }}</p>
+                {% endif %}
+
+                <form class="form-card" action="/add-session" method="POST">
+                    <div class="form-group">
+                        <label for="session_name">Session name</label>
+                        <input id="session_name" type="text" name="session_name" autofocus>
+                    </div>
+
+                    <button class="button" type="submit">
+                        Create Session
+                    </button>
+                </form>
+
+                <a class="button-secondary" href="/sessions">
+                    ← Back to Sessions
+                </a>
+            </div>
+    </body>
+</html>

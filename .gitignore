@@ -1,0 +1,11 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+gym.db
+.DS_Store
+
+# Testing / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/

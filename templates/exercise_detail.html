@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ exercise_name }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    
+    <body>
+        <div class="container">
+            <div class="page-header exercise-hero">
+                <div>
+                    <p class="eyebrow">Exercise Detail</p>
+                    <h1>{{ exercise_name }}</h1>
+                    <p class="muted">
+                        {{ sets|length }} set{% if sets|length != 1 %}s{% endif %} logged for this exercise.
+                    </p>
+                </div>
+
+                <a class="button" href="/sessions/{{ session_id }}/exercises/{{ exercise_id }}/add-set">
+                    + Add Set
+                </a>
+            </div>
+
+            <div class="helper-card">
+                Add sets as you train, then review weight and reps from this exercise history.
+            </div>
+
+            <h2 class="section-title">Sets</h2>
+
+            {% if not sets %}
+                <div class="empty-card">
+                    No sets logged yet. Add your first set to start tracking this exercise.
+                </div>
+            {% else %}
+                <div class="sets-list">
+                    {% for set_entry in sets %}
+                        <div class="card set-card exercise-set-card">
+                            <div>
+                                <span class="card-title">{{ set_entry[2] }} lbs</span>
+                                <p class="card-meta">
+                                    {{ set_entry[1] }} rep{% if set_entry[1] != 1 %}s{% endif %}
+                                </p>
+                            </div>
+
+                            <form action="/sessions/{{ session_id }}/exercises/{{ exercise_id }}/sets/{{ set_entry[0] }}/delete" method="POST">
+                                <button class="danger-button" type="submit" onclick="return confirm('Delete this set?');">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <a class="button-secondary" href="/sessions/{{ session_id }}">
+                ← Back to Session
+            </a>
+        </div>
+    </body>
+</html>

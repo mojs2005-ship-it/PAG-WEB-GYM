@@ -1,0 +1,12 @@
+[run]
+omit =
+    tests/*
+    e2e/*
+    venv/*
+    .venv/*
+    */__pycache__/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:

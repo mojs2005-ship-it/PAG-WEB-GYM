@@ -1,0 +1,182 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_NAME: gym-log-web
+
+jobs:
+  # ---------------------------------------------------------------
+  # 1) Unit tests + coverage (Fase 3)
+  # ---------------------------------------------------------------
+  unit-tests:
+    name: Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run pytest with coverage (fails if < 80%)
+        run: pytest --cov=. --cov-report=xml --cov-report=term-missing --cov-fail-under=80
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ---------------------------------------------------------------
+  # 2) Selenium E2E tests (Fase 4) - headless in CI, no display.
+  #    GitHub's ubuntu runners already ship Google Chrome; Selenium
+  #    Manager downloads the matching chromedriver automatically.
+  #    e2e/ has its own pytest.ini so it does not inherit the --cov
+  #    flags of the unit-test configuration.
+  # ---------------------------------------------------------------
+  e2e-tests:
+    name: Selenium E2E Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements-e2e.txt
+
+      - name: Show installed Chrome
+        run: google-chrome --version
+
+      - name: Run Selenium E2E suite (headless)
+        working-directory: e2e
+        env:
+          E2E_HEADLESS: "1"
+        run: pytest
+
+  # ---------------------------------------------------------------
+  # 3) Docker build + smoke test on /api/health (Fases 2 y 6)
+  # ---------------------------------------------------------------
+  docker-build:
+    name: Docker Build & Smoke Test
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ env.IMAGE_NAME }}:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run container and smoke test /api/health
+        run: |
+          docker run -d -p 5000:5000 --name gym-log-web-ci ${{ env.IMAGE_NAME }}:ci
+
+          success=""
+          for i in $(seq 1 20); do
+            if curl --fail -s http://localhost:5000/api/health; then
+              success="1"
+              break
+            fi
+            sleep 1
+          done
+          echo
+
+          echo "----- docker ps -a -----"
+          docker ps -a
+          echo "----- docker logs gym-log-web-ci -----"
+          docker logs gym-log-web-ci
+
+          docker stop gym-log-web-ci || true
+
+          if [ -z "$success" ]; then
+            echo "::error::The container never answered on /api/health - see docker logs above."
+            exit 1
+          fi
+
+      - name: Save image as artifact for the security-scan job
+        run: docker save ${{ env.IMAGE_NAME }}:ci -o image.tar
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: image.tar
+          retention-days: 1
+
+  # ---------------------------------------------------------------
+  # 4) Security reports: Python dependencies + container image
+  # ---------------------------------------------------------------
+  security-scan:
+    name: Security Reports
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Audit Python dependencies (pip-audit)
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt -f json -o pip-audit-report.json || true
+          pip-audit -r requirements.txt || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+          if-no-files-found: warn
+
+      - name: Download built image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+
+      - name: Load image
+        run: docker load -i image.tar
+
+      # Report-only: findings are published as an artifact, they do not
+      # block the pipeline (and a Trivy DB download hiccup must not either).
+      - name: Scan image for vulnerabilities (Trivy)
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: true
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:ci
+          format: table
+          output: trivy-report.txt
+          severity: CRITICAL,HIGH,MEDIUM
+          exit-code: "0"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-image-report
+          path: trivy-report.txt
+          if-no-files-found: warn

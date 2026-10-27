@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Add Set</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="page-header form-hero">
+                <p class="page-kicker">Exercise</p>
+                <h1>Add Set</h1>
+                <p class="page-description">
+                    Log a new set for {{ exercise_name }}.
+                </p>
+            </div>
+
+            <form class="form-card" action="/sessions/{{ session_id }}/exercises/{{ exercise_id }}/add-set" method="POST">
+                {% if error %}
+                    <p class="error-message">{{ error }}</p>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="weight">Weight</label>
+                    <input type="number" id="weight" name="weight" placeholder="Enter weight in pounds" autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="reps">Reps</label>
+                    <input type="number" id="reps" name="reps" placeholder="Enter number of reps">
+                </div>
+                
+                <button class="button" type="submit">Add Set</button>
+            </form>
+
+            <a class="button-secondary" href="/sessions/{{ session_id }}/exercises/{{ exercise_id }}">
+                ← Back to {{ exercise_name }}
+            </a>
+        </div>
+    </body>
+</html>

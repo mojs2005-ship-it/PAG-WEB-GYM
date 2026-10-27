@@ -1,0 +1,75 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.17, pytest-8.3.4, pluggy-1.7.0 -- /tmp/claude-0/-home-claude/33a5a5f6-ddc8-5845-806f-26a0d5411f11/scratchpad/venv_parent/v/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/claude/work/gym_log_web
+configfile: pytest.ini
+testpaths: tests
+plugins: cov-7.1.0
+collecting ... collected 42 items
+
+tests/test_api.py::test_api_create_session PASSED                        [  2%]
+tests/test_api.py::test_api_create_session_missing_name_returns_400 PASSED [  4%]
+tests/test_api.py::test_api_list_sessions PASSED                         [  7%]
+tests/test_api.py::test_api_session_detail_json PASSED                   [  9%]
+tests/test_api.py::test_api_session_not_found_returns_404 PASSED         [ 11%]
+tests/test_api.py::test_api_create_set PASSED                            [ 14%]
+tests/test_api.py::test_api_create_set_invalid_payload_returns_400 PASSED [ 16%]
+tests/test_api.py::test_api_list_sets PASSED                             [ 19%]
+tests/test_api.py::test_api_stats PASSED                                 [ 21%]
+tests/test_exercises.py::test_add_exercise_get_shows_form PASSED         [ 23%]
+tests/test_exercises.py::test_add_exercise_get_unknown_session_returns_404 PASSED [ 26%]
+tests/test_exercises.py::test_add_exercise_post_creates_and_redirects PASSED [ 28%]
+tests/test_exercises.py::test_add_exercise_post_empty_name_shows_error PASSED [ 30%]
+tests/test_exercises.py::test_exercise_detail_not_found_returns_404 PASSED [ 33%]
+tests/test_exercises.py::test_exercise_detail_found_shows_name PASSED    [ 35%]
+tests/test_exercises.py::test_delete_exercise_removes_it PASSED          [ 38%]
+tests/test_health.py::test_health_returns_ok_with_expected_fields PASSED [ 40%]
+tests/test_health.py::test_health_reports_configured_commit PASSED       [ 42%]
+tests/test_health.py::test_health_returns_503_when_database_fails PASSED [ 45%]
+tests/test_main.py::test_home_page_loads PASSED                          [ 47%]
+tests/test_main.py::test_home_page_shows_zero_stats_when_empty PASSED    [ 50%]
+tests/test_main.py::test_home_page_reflects_created_data PASSED          [ 52%]
+tests/test_services.py::test_parse_weight_valid_float PASSED             [ 54%]
+tests/test_services.py::test_parse_weight_valid_int_like_float_returns_int PASSED [ 57%]
+tests/test_services.py::test_parse_weight_rejects_zero_or_negative PASSED [ 59%]
+tests/test_services.py::test_parse_weight_rejects_non_numeric PASSED     [ 61%]
+tests/test_services.py::test_parse_positive_int_valid PASSED             [ 64%]
+tests/test_services.py::test_parse_positive_int_rejects_zero_or_negative PASSED [ 66%]
+tests/test_services.py::test_parse_positive_int_rejects_non_numeric PASSED [ 69%]
+tests/test_sessions.py::test_add_session_get_shows_form PASSED           [ 71%]
+tests/test_sessions.py::test_add_session_post_creates_session_and_redirects PASSED [ 73%]
+tests/test_sessions.py::test_add_session_post_empty_name_shows_error PASSED [ 76%]
+tests/test_sessions.py::test_sessions_list_shows_created_session PASSED  [ 78%]
+tests/test_sessions.py::test_sessions_list_empty_state PASSED            [ 80%]
+tests/test_sessions.py::test_session_detail_not_found_returns_404 PASSED [ 83%]
+tests/test_sessions.py::test_session_detail_found_shows_title PASSED     [ 85%]
+tests/test_sessions.py::test_delete_session_removes_it PASSED            [ 88%]
+tests/test_sets.py::test_add_set_get_shows_form PASSED                   [ 90%]
+tests/test_sets.py::test_add_set_post_creates_and_redirects PASSED       [ 92%]
+tests/test_sets.py::test_add_set_post_invalid_weight_shows_error PASSED  [ 95%]
+tests/test_sets.py::test_add_set_post_negative_reps_shows_error PASSED   [ 97%]
+tests/test_sets.py::test_delete_set_removes_it PASSED                    [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.17-final-0 _______________
+
+Name                      Stmts   Miss  Cover   Missing
+-------------------------------------------------------
+app.py                       24      0   100%
+blueprints/__init__.py        0      0   100%
+blueprints/api.py            74      5    93%   104-112
+blueprints/exercises.py      29      0   100%
+blueprints/main.py           17      0   100%
+blueprints/sessions.py       35      2    94%   37-38
+blueprints/sets.py           23      1    96%   17
+config.py                    20      0   100%
+database.py                  21      0   100%
+models/__init__.py            0      0   100%
+models/exercises.py          21      2    90%   46-47
+models/sessions.py           23      1    96%   49
+models/sets.py               14      0   100%
+services.py                  16      0   100%
+-------------------------------------------------------
+TOTAL                       317     11    97%
+Required test coverage of 80% reached. Total coverage: 96.53%
+============================== 42 passed in 1.18s ==============================

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Workout Sessions</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="page-header page-header-row">
+                <div>
+                    <p class="eyebrow">Workout History</p>
+                    <h1>Workout Sessions</h1>
+                    <p class="muted">Review past workouts, open a session, or start a new log.</p>
+                </div>
+
+                <a class="button" href="/add-session">
+                    + Add Session
+                </a>
+            </div>
+
+            <h2 class="section-title">Sessions</h2>
+
+            {% if not workout_sessions %}
+                <div class="empty-card">
+                    No workout sessions yet. Create your first session to start tracking your training.
+                </div>
+            {% else %}
+                <div class="sessions-list">
+                    {% for session in workout_sessions %}
+                        <div class="card set-card session-card">
+                            <a class="session-link" href="/sessions/{{ session.id }}">
+                                <span class="card-title">{{ session.name }}</span>
+                                <p class="card-meta">
+                                    {{ session.date }} • {{ session.exercise_count }} exercise{% if session.exercise_count != 1 %}s{% endif %}
+                                </p>
+                            </a>
+
+                            <form action="/sessions/{{ session.id }}/delete" method="POST">
+                                <button class="danger-button" type="submit" onclick="return confirm('Delete this workout session?');">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <a class="button-secondary" href="/">
+                ← Home Page
+            </a>
+        </div>
+    </body>
+</html>
